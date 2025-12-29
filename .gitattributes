@@ -1,0 +1,38 @@
+############################
+# Default behavior
+############################
+
+* text=auto
+
+############################
+# Python source files
+############################
+
+*.py      text eol=lf
+*.pyi     text eol=lf
+*.toml    text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.json    text eol=lf
+*.md      text eol=lf
+*.txt     text eol=lf
+
+############################
+# Shell / scripts
+############################
+
+*.sh      text eol=lf
+*.bash    text eol=lf
+
+############################
+# Jupyter notebooks
+############################
+
+*.ipynb  text eol=lf diff=jupyter
+
+############################
+# Data files (treat as binary)
+############################
+
+*.csv       binary
+*.t*

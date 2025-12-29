@@ -1,0 +1,185 @@
+############################
+# Python bytecode & caches
+############################
+__pycache__/
+*.py[cod]
+*$py.class
+
+############################
+# Virtual environments
+############################
+.venv/
+venv/
+env/
+ENV/
+
+############################
+# uv / pip artifacts
+############################
+# uv.lock is usually COMMITTED for reproducibility
+# Uncomment the next line if you explicitly don't want it
+# uv.lock
+
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+
+############################
+# Build artifacts
+############################
+build/
+dist/
+wheelhouse/
+
+############################
+# Test / coverage artifacts
+############################
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+############################
+# Lint / type-check caches
+############################
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+############################
+# Jupyter / notebooks
+############################
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+############################
+# Logs & runtime files
+############################
+*.log
+*.pid
+*.sqlite3
+*.db
+
+############################
+# OS-specific junk
+############################
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+############################
+# Editor / IDE files
+############################
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+############################
+# Temporary files
+############################
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+############################
+# Environment variables / secrets
+############################
+.env
+.env.*
+*.env
+
+############################
+# Data / ML artifacts (optional)
+############################
+# Uncomment if applicable
+# data/
+# datasets/
+# *.csv
+# *.parquet
+# *.h5
+# *.model
+# *.pt
+# *.pth
+# *.onnx
+
+############################
+# Documentation builds
+############################
+docs/_build/
+site/
+
+############################
+# Local scripts / scratch
+############################
+scratch/
+sandbox/
+experiments/
+
+############################
+# Pandas / Data science
+############################
+
+data/
+datasets/
+raw_data/
+processed_data/
+interim/
+outputs/
+
+*.csv
+*.tsv
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+
+############################
+# ML training artifacts
+############################
+
+checkpoints/
+runs/
+logs/
+wandb/
+mlruns/
+
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.model
+
+############################
+# Experiment tracking
+############################
+
+tensorboard/
+tb_logs/
+lightning_logs/
+
+############################
+# Notebooks (optional)
+############################
+
+# Uncomment if you do NOT want notebooks tracked
+# *.ipynb
+
+############################
+# Large local files
+############################
+
+*.npy
+*.npz
