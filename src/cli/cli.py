@@ -1,6 +1,7 @@
 import itertools
 import os
 from pathlib import Path
+from typing import Annotated
 
 import pandas as pd
 import typer
@@ -12,6 +13,7 @@ from rich.prompt import Confirm, Prompt
 from rich.status import Status
 from rich.theme import Theme
 
+from cli.model import header
 from pairwise import ssot
 from utils import load_pd
 
@@ -41,25 +43,26 @@ Your current working directory is: `{cwd}`
 
 rank = """
 # Select the easier algorithm from the following pair:
-1. {label1} | {alg1}
-2. {label2} | {alg2}
+1. *{label1}* | `{alg1}`
+2. *{label2}* | `{alg2}`
 """
 
 
 @app.command()
-def run_cli():
+def run_cli(target_path: Annotated[str, typer.Argument()]):
     try:
         cwd = Path(os.getcwd())
 
-        console.print(
-            Panel(
-                Markdown(info.format(cwd=cwd)),
-                title="Instructions",
-                border_style="white",
+        if target_path is None:
+            console.print(
+                Panel(
+                    Markdown(info.format(cwd=cwd)),
+                    title="Instructions",
+                    border_style="white",
+                )
             )
-        )
 
-        correct = False
+        correct = target_path is not None
         while not correct:
             relative_target = Prompt.ask("Directory")
             target_path = (cwd / relative_target).resolve()
@@ -70,6 +73,9 @@ def run_cli():
                     "The directory does not exist or is a file.", style="danger"
                 )
                 correct = False
+        
+        if type(target_path) is str:
+            target_path = Path(target_path)
 
         data = [file for file in target_path.rglob("*_features.csv")]
         if not data:
@@ -112,12 +118,32 @@ def run_cli():
         ranked_already = (pairs["easier"] != "N").sum()
         total = len(pairs)
 
+        cli_state = target_path.parent / ".cli-state"
+        timer = header.load_timer(cli_state)
+        timer.start()
+
+        skips = decisions = 0
+        last_skipped = False
+
         for row in unranked.sample(frac=1, random_state=42).itertuples():
-            ranked_already += 1
+            if not last_skipped:
+                ranked_already += 1
+            last_skipped = False
 
             alg1 = algs_by_label.loc[row.alg_a]
             alg2 = algs_by_label.loc[row.alg_b]
+
             console.clear()
+
+            progress = ranked_already / total
+            title = header.build_header(
+                total_items=total,
+                completed=ranked_already,
+                timer=timer,
+                decisions=decisions,
+                skips=skips
+            )
+
             console.print(
                 Panel(
                     Markdown(
@@ -128,24 +154,28 @@ def run_cli():
                             alg2=alg2["Algorithm"],
                         )
                     ),
-                    title=f"{ranked_already} / {total}",
+                    title=title,
                     border_style="white",
                 )
             )
 
             value = Prompt.ask(
-                "[1/2]",
-                choices=["1", "2", "stop", "exit", "skip"],
+                "[1/2/eq]",
+                choices=["1", "2", "eq", "stop", "exit", "skip"],
                 show_choices=False,
                 default="skip",
                 show_default=False,
                 console=console,
             )
-            
+
             if value in ["stop", "exit"]:
                 break
             if value == "skip":
+                last_skipped = True
+                skips += 1
                 continue
+            else:
+                decisions += 1
 
             updated_ranking[row.Index] = value
 
@@ -160,3 +190,6 @@ def run_cli():
         raise
     except KeyboardInterrupt:
         console.print("\nBye")
+    finally:
+        timer.stop()
+        header.save_timer(cli_state, timer)

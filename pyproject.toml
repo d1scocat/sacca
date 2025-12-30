@@ -34,6 +34,7 @@ cli = [
 
 [project.scripts]
 lint = "sacca.scripts.lint:main"
+run-cli = "cli:app"
 
 [tool.ruff]
 line-length = 88
