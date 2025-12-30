@@ -1,6 +1,6 @@
-import pandas as pd
 from pathlib import Path
 
+import pandas as pd
 
 _SLICE_SYMBOLS = "SME"
 _WIDE_SYMBOLS = "rludfbw"
@@ -26,8 +26,8 @@ def parse_features(filepath: Path, output_path: Path):
     df["slices"] = df["Algorithm"].str.count("|".join(_SLICE_SYMBOLS))
     df["wide"] = df["Algorithm"].str.count("|".join(_WIDE_SYMBOLS))
     df["rot"] = df["Algorithm"].str.count("|".join(_ROTATION_SYMBOLS))
-    
+
     for face in _FACE_SYMBOLS:
         df[face] = df["Algorithm"].str.upper().str.count(face)
-    
+
     df.to_csv(output_path, index=False)

@@ -1,28 +1,24 @@
-import os
 import itertools
-
-import typer
-import pandas as pd
-
-from click import exceptions
+import os
 from pathlib import Path
+
+import pandas as pd
+import typer
+from click import exceptions
 from rich.console import Console
-from rich.status import Status
-from rich.panel import Panel
 from rich.markdown import Markdown
-from rich.prompt import Prompt, Confirm
+from rich.panel import Panel
+from rich.prompt import Confirm, Prompt
+from rich.status import Status
 from rich.theme import Theme
 
 from pairwise import ssot
 from utils import load_pd
 
-
 app = typer.Typer()
 
 
-theme = Theme(
-    {"warning": "magenta", "danger": "bold red"}
-)
+theme = Theme({"warning": "magenta", "danger": "bold red"})
 console = Console(theme=theme)
 
 info = """
@@ -44,10 +40,9 @@ Your current working directory is: `{cwd}`
 """
 
 rank = """
-##### Write "stop" to pause and save the current ranking data.
-# Which is easier?
-1. {label1}: {alg1}
-2. {label2}: {alg2}
+# Select the easier algorithm from the following pair:
+1. {label1} | {alg1}
+2. {label2} | {alg2}
 """
 
 
@@ -56,31 +51,38 @@ def run_cli():
     try:
         cwd = Path(os.getcwd())
 
-        console.print(Panel(
-            Markdown(info.format(cwd=cwd)),
-            title="Instructions",
-            border_style="white",
-        ))
+        console.print(
+            Panel(
+                Markdown(info.format(cwd=cwd)),
+                title="Instructions",
+                border_style="white",
+            )
+        )
 
         correct = False
-        while not correct:    
+        while not correct:
             relative_target = Prompt.ask("Directory")
             target_path = (cwd / relative_target).resolve()
             correct = Confirm.ask(f"{target_path} | is that correct?", console=console)
 
             if correct and (not target_path.exists() or not target_path.is_dir()):
-                console.print("The directory does not exist or is a file.", style="danger")
+                console.print(
+                    "The directory does not exist or is a file.", style="danger"
+                )
                 correct = False
-        
+
         data = [file for file in target_path.rglob("*_features.csv")]
         if not data:
             console.print("No features file found.", style="danger")
             raise typer.Exit(code=1)
-        
+
         if len(data) > 1:
-            console.print("Ambiguous directory - multiple files end in \"_features.csv\".", style="danger")
+            console.print(
+                'Ambiguous directory - multiple files end in "_features.csv".',
+                style="danger",
+            )
             raise typer.Exit(code=1)
-        
+
         features_file = data[0]
         prefix = features_file.stem.removesuffix("_features")
         pairs_file = target_path / f"{prefix}_pairs.csv"
@@ -100,9 +102,9 @@ def run_cli():
                     (alg1, alg2, "N")
                     for alg1, alg2 in itertools.combinations(algs_list, 2)
                 ]
-                
+
                 pairs = pd.DataFrame(rows, columns=pairs.columns)
-            
+
             unranked = pairs.loc[pairs["easier"] == "N"]
             updated_ranking = {}
 
@@ -110,32 +112,49 @@ def run_cli():
         ranked_already = (pairs["easier"] != "N").sum()
         total = len(pairs)
 
-        for row in unranked.itertuples():
+        for row in unranked.sample(frac=1, random_state=42).itertuples():
             ranked_already += 1
 
             alg1 = algs_by_label.loc[row.alg_a]
             alg2 = algs_by_label.loc[row.alg_b]
-            console.print(Panel(
-                Markdown(rank.format(
-                    label1=alg1.name,
-                    label2=alg2.name,
-                    alg1=alg1["Algorithm"],
-                    alg2=alg2["Algorithm"],
-                )),
-                title=f"{ranked_already} / {total}",
-                border_style="white",
-            ))
+            console.clear()
+            console.print(
+                Panel(
+                    Markdown(
+                        rank.format(
+                            label1=alg1.name,
+                            label2=alg2.name,
+                            alg1=alg1["Algorithm"],
+                            alg2=alg2["Algorithm"],
+                        )
+                    ),
+                    title=f"{ranked_already} / {total}",
+                    border_style="white",
+                )
+            )
 
-            value = Prompt.ask("> ", choices=["1", "2", "stop"])
-            if value == "stop":
+            value = Prompt.ask(
+                "[1/2]",
+                choices=["1", "2", "stop", "exit", "skip"],
+                show_choices=False,
+                default="skip",
+                show_default=False,
+                console=console,
+            )
+            
+            if value in ["stop", "exit"]:
                 break
+            if value == "skip":
+                continue
 
             updated_ranking[row.Index] = value
-            
+
         if updated_ranking:
-            pairs.loc[list(updated_ranking.keys()), "easier"] = list(updated_ranking.values())
+            pairs.loc[list(updated_ranking.keys()), "easier"] = list(
+                updated_ranking.values()
+            )
             pairs.to_csv(pairs_file, index=False)
-        
+
         console.print(f"Saved {len(updated_ranking)} new rankings.\nBye")
     except exceptions.Exit:
         raise

@@ -1,5 +1,1 @@
-HEADERS = [
-    "alg_a",
-    "alg_b",
-    "easier"
-]
+HEADERS = ["alg_a", "alg_b", "easier"]

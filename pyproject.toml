@@ -32,13 +32,16 @@ cli = [
     "typer"
 ]
 
+[project.scripts]
+lint = "sacca.scripts.lint:main"
+
 [tool.ruff]
 line-length = 88
-select = ["E", "F", "I", "B"]
-ignore = ["E203", "W503", "W504"]
+lint.select = ["E", "F", "I", "B"]
+lint.ignore = ["E203"]
 
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
 "tests/*" = ["S101"]
 
 [tool.setuptools]
