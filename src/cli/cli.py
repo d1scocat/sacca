@@ -17,8 +17,8 @@ from cli.model import header
 from pairwise import ssot
 from utils import load_pd
 
-app = typer.Typer()
 
+app = typer.Typer()
 
 theme = Theme({"warning": "magenta", "danger": "bold red"})
 console = Console(theme=theme)
@@ -43,6 +43,7 @@ Your current working directory is: `{cwd}`
 
 rank = """
 # Select the easier algorithm from the following pair:
+Rank based on execution ease assuming optimal fingertricks and repeated use, not learnability or intuitiveness.
 1. *{label1}* | `{alg1}`
 2. *{label2}* | `{alg2}`
 """
@@ -73,7 +74,7 @@ def run_cli(target_path: Annotated[str, typer.Argument()]):
                     "The directory does not exist or is a file.", style="danger"
                 )
                 correct = False
-        
+
         if type(target_path) is str:
             target_path = Path(target_path)
 
@@ -118,7 +119,7 @@ def run_cli(target_path: Annotated[str, typer.Argument()]):
         ranked_already = (pairs["easier"] != "N").sum()
         total = len(pairs)
 
-        cli_state = target_path.parent / ".cli-state"
+        cli_state = target_path / ".cli-state"
         timer = header.load_timer(cli_state)
         timer.start()
 
@@ -138,10 +139,10 @@ def run_cli(target_path: Annotated[str, typer.Argument()]):
             progress = ranked_already / total
             title = header.build_header(
                 total_items=total,
-                completed=ranked_already,
+                completed=ranked_already - 1,
                 timer=timer,
                 decisions=decisions,
-                skips=skips
+                skips=skips,
             )
 
             console.print(

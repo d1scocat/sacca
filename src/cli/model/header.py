@@ -20,7 +20,7 @@ class TimerState:
         if self.last_start is not None:
             self.elapsed += time.time() - self.last_start
             self.last_start = None
-    
+
     def eta(self, progress: float) -> Optional[float]:
         """
         Estimate remaining time in seconds.
@@ -39,7 +39,7 @@ class TimerState:
         remaining = total_estimated - elapsed
 
         return max(0.0, remaining)
-    
+
     def avg_per_item(self, amount: int) -> Optional[float]:
         """
         Average time per item in seconds.
@@ -55,7 +55,7 @@ class TimerState:
         if self.last_start is None:
             return self.elapsed
         return self.elapsed + (time.time() - self.last_start)
-    
+
     @property
     def session(self) -> float:
         if self.session_start is None:
@@ -86,7 +86,6 @@ def format_duration(seconds: float) -> str:
     h, rem = divmod(seconds, 3600)
     m, s = divmod(rem, 60)
     return f"{h:02d}:{m:02d}:{s:02d}"
-
 
 
 def eta_confident(progress: float, completed: int) -> bool:
@@ -142,9 +141,7 @@ def build_header(
         format_remaining(remaining, progress),
         format_eta(eta, confident),
         f"⏱ total {format_duration(timer.total)} (+{format_duration(timer.session)})",
-        format_avg_and_rate(
-            timer.total / completed if completed > 0 else None
-        ),
+        format_avg_and_rate(timer.total / completed if completed > 0 else None),
         format_decisions(decisions, skips),
     ]
 
