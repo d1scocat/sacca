@@ -75,7 +75,7 @@ def run_cli(target_path: Annotated[str, typer.Argument()]):
                 )
                 correct = False
 
-        if type(target_path) is str:
+        if isinstance(target_path, str):
             target_path = Path(target_path)
 
         data = [file for file in target_path.rglob("*_features.csv")]
