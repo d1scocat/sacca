@@ -136,7 +136,6 @@ def run_cli(target_path: Annotated[str, typer.Argument()]):
 
             console.clear()
 
-            progress = ranked_already / total
             title = header.build_header(
                 total_items=total,
                 completed=ranked_already - 1,
